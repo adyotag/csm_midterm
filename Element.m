@@ -47,23 +47,23 @@ classdef Element < handle
         
         % Returns the Shape Functions depending on the type of element at hand
         function r = getShapeFunctions(self)
-            if self.elem_type == 4
+            if self.elem_type == 4 % Correct
                 r = @(k, n) 0.25*[(1-k)*(1-n), (1+k)*(1-n), (1+k)*(1+n), (1-k)*(1+n)];
-            elseif self.elem_type == 8
+            elseif self.elem_type == 8 % Correct
                 r = @(k, n) [0.25*(k-1)*(1-n)*(1+k+n), 0.25*(1+k)*(n-1)*(1-k+n), 0.25*(1+k)*(1+n)*(-1+k+n), 0.25*(k-1)*(1+n)*(1+k-n),  ...
-				0.5*(1-k^2)*(1-n), 0.5*(1+k)*(1-n^2) , 0.5*(1-k^2)*(1+n), 0.5*(1-k)*(1-n^2) ];
-            elseif self.elem_type == 9
+                            0.5*(1-k^2)*(1-n), 0.5*(1+k)*(1-n^2) , 0.5*(1-k^2)*(1+n), 0.5*(1-k)*(1-n^2) ];
+            elseif self.elem_type == 9 % Correct
                 r = @(k, n) [0.25*k*n*(k-1)*(n-1), 0.25*k*n*(k+1)*(n-1), 0.25*k*n*(k+1)*(n+1), 0.25*k*n*(k-1)*(n+1),  ...
-				0.5*n*(1-n)*(k^2 - 1), 0.5*k*(-k-1)*(n^2 - 1) , 0.5*n*(-n-1)*(k^2 - 1), 0.5*k*(1-k)*(n^2 - 1),  ...
-				(1-k^2)*(1-n^2) ];
+                            0.5*n*(1-n)*(k^2 - 1), 0.5*k*(-k-1)*(n^2 - 1) , 0.5*n*(-n-1)*(k^2 - 1), 0.5*k*(1-k)*(n^2 - 1),  ...
+                            (1-k^2)*(1-n^2) ];
             end
         end
 
         % Returns the derivatives of the Shape Functions depending on the type of element at hand
         function r = getShapeFunctionsD(self)
-            if self.elem_type == 4
-                r = @(k,n) 0.25 * [n-1, -1-n, 1+n, 1-n; k-1, 1-k, 1+k, -1-k];
-            elseif self.elem_type == 8
+            if self.elem_type == 4 % Correct
+                r = @(k,n) 0.25 * [n-1, 1-n, 1+n, -1-n; k-1, -1-k, 1+k, 1-k];
+            elseif self.elem_type == 8 % Correct
                 r = @(k,n) [0.25*(1-n)*(2*k+n), 0.25*(1-n)*(2*k-n), 0.25*(1+n)*(2*k+n), 0.25*(1+n)*(2*k-n), k*(n-1), 0.5*(1-n*n), k*(-n-1), 0.5*(-1+n*n); ...
                             0.25*(1-k)*(2*n+k), 0.25*(1+k)*(2*n-k), 0.25*(1+k)*(2*n+k), 0.25*(1-k)*(2*n-k), 0.5*(-1+k*k), n*(-k-1), 0.5*(1-k*k), n*(k-1)];
             elseif self.elem_type == 9
@@ -118,18 +118,40 @@ classdef Element < handle
                 
                 % Computation of the jacobian
                 SFDH = self.getShapeFunctionsD(); % shape function derivative handle
-                SFDM = SFDH(k,n); % shape function derivative matrix  
+                SFDM = SFDH(k,n); % shape function derivative matrix 
                 temp1 = sum(reshape(SFDM(:)' .* self.positions, [2, self.elem_type]),2);            
                 temp2 = sum(reshape(reshape(flip(SFDM, 1),[1, self.elem_type*2]) .* self.positions, [2, self.elem_type]),2);
                 J = [temp1(1), temp2(1); temp2(2), temp1(2)];
-                
-                SFH = self.getShapeFunctions();
-                SFM = SFH(k,n);
+                SFH = self.getShapeFunctions(); % shape function handle
+                SFM = SFH(k,n); % shape function matrix
                 r = r + reshape(repmat(SFM,2,1),[2*self.elem_type,1]) * det(J);
 
             end
             r = repmat(self.bforce,self.elem_type,1) .* r;
             
+        end
+        
+        function r = getGlobalStiffness(self, m)
+                r = zeros(m);
+                [L_r, L_c] = meshgrid(1:self.elem_type*2, 1:self.elem_type*2);
+                localidx = [L_r(:), L_c(:)];
+                
+                globalarrpos = 2*(reshape(repmat(self.local_num,2,1),[self.elem_type*2,1]) - 1) + 1 + cast(mod((1:self.elem_type*2) - 1, 2)', 'uint32');
+                [G_r, G_c] = meshgrid(globalarrpos, globalarrpos);
+                globalidx = [G_r(:), G_c(:)];
+                
+                localidx1D = sub2ind(size(self.local_stiffness_matrix), localidx(:,1), localidx(:,2));
+                globalidx1D = sub2ind(size(r), globalidx(:,1), globalidx(:,2));
+
+                r(globalidx1D) = self.local_stiffness_matrix(localidx1D);
+                
+        end
+        
+        function r = getGlobalLoading(self, m)
+            r = zeros(m,1);
+            globalidx =  2*(reshape(repmat(self.local_num,2,1),[self.elem_type*2,1]) - 1) + 1 + cast(mod((1:self.elem_type*2) - 1, 2)', 'uint32');     
+            r(globalidx) = self.local_loading_vector;
+
         end
 
     end
