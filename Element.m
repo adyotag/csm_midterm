@@ -11,10 +11,11 @@ classdef Element < handle
        int_weights = NaN;
        local_stiffness_matrix = NaN;
        local_loading_vector = NaN;
+       bforce = zeros(2,1);
     end
     methods
         % Constructor
-        function self = Element(elem_num, local_num, pos, nen, nIntPts, ps, E, nu)
+        function self = Element(elem_num, local_num, pos, nen, nIntPts, ps, E, nu, bforce)
             assert(nen==4 | nen==8 | nen==9 , "Improper Element type !");
             assert(length(pos)==2*length(local_num), "Global node number and node position arrays not same length !");
             assert(ps == 1 | ps == 2, "Must choose (1) Plane strain OR (2) Plane stress !")
@@ -23,6 +24,7 @@ classdef Element < handle
             self.local_num = local_num;
             self.positions = pos;
             self.elem_type = nen;
+            self.bforce(2) = bforce;    % y-component only specified in body force
             self.lambda = E*nu*((1.+nu)*(1.-2.*nu))^-1; self.mu = E*(2*(1+nu));
             if ps == 1  % Plane Strain case
                 self.elem_D(1,1) = self.lambda + 2*self.mu; self.elem_D(1,2) = self.lambda;
@@ -65,8 +67,8 @@ classdef Element < handle
                 r = @(k,n) [0.25*(1-n)*(2*k+n), 0.25*(1-n)*(2*k-n), 0.25*(1+n)*(2*k+n), 0.25*(1+n)*(2*k-n), k*(n-1), 0.5*(1-n*n), k*(-n-1), 0.5*(-1+n*n); ...
                             0.25*(1-k)*(2*n+k), 0.25*(1+k)*(2*n-k), 0.25*(1+k)*(2*n+k), 0.25*(1-k)*(2*n-k), 0.5*(-1+k*k), n*(-k-1), 0.5*(1-k*k), n*(k-1)];
             elseif self.elem_type == 9
-                syms k n;
-                r = matlabFunction([diff(self.getShapeFunctions(),k,1); diff(self.getShapeFunctions(),n,1) ])
+                r = @(k,n) [0.25*n*(2*k-1)*(n-1), 0.25*n*(2*k+1)*(n-1), 0.25*n*(2*k+1)*(n+1), 0.25*n*(2*k-1)*(n+1), k*n*(1-n), 0.5*(2*k+1)*(1-n^2), -k*n*(n+1), 0.5*(1-2*k)*(n^2-1), 2*k*(n^2-1); ...
+                            0.25*k*(2*n-1)*(k-1), 0.25*k*(k+1)*(2*n-1), 0.25*k*(2*n+1)*(k+1), 0.25*k*(2*n+1)*(k-1), 0.5*(k^2-1)*(1-2*n), -n*k*(k+1), 0.5*(2*n+1)*(1-k^2), n*k*(1-k), 2*n*(k^2-1) ];
             end
         end
         
@@ -81,13 +83,11 @@ classdef Element < handle
             for iter = 1:length(iweights)
                 k = ipos(iter,1); n = ipos(iter,2); w = iweights(iter);
 
-                SFDH = self.getShapeFunctionsD(); % shape function derivative handle
-                SFDM = SFDH(k,n); % shape function derivative matrix            
-
                 % Computation of the jacobian
+                SFDH = self.getShapeFunctionsD(); % shape function derivative handle
+                SFDM = SFDH(k,n); % shape function derivative matrix  
                 temp1 = sum(reshape(SFDM(:)' .* self.positions, [2, self.elem_type]),2);            
                 temp2 = sum(reshape(reshape(flip(SFDM, 1),[1, self.elem_type*2]) .* self.positions, [2, self.elem_type]),2);
-
                 J = [temp1(1), temp2(1); temp2(2), temp1(2)];
 
                 % Computation of B
@@ -100,14 +100,36 @@ classdef Element < handle
                 B = A * G;
 
                 % Creating Local Stiffness Matrix
-                r = r + B'*self.elem_D*B*w;
-            
+                r = r + B'*self.elem_D*B*det(J)*w;
+                
             end
         end
         
         % Returns local loading vector of the element
         function r = generateLoadingVector(self)
-            r = -1;
+            r = zeros(2*self.elem_type,1);
+            [kk, nn] = meshgrid(self.int_pos, self.int_pos);
+            [wk, wn] = meshgrid(self.int_weights, self.int_weights); 
+            ipos = [kk(:),nn(:)];
+            iweights = prod([wk(:), wn(:)] ,2);
+            
+            for iter = 1:length(iweights)
+                k = ipos(iter,1); n = ipos(iter,2); w = iweights(iter);
+                
+                % Computation of the jacobian
+                SFDH = self.getShapeFunctionsD(); % shape function derivative handle
+                SFDM = SFDH(k,n); % shape function derivative matrix  
+                temp1 = sum(reshape(SFDM(:)' .* self.positions, [2, self.elem_type]),2);            
+                temp2 = sum(reshape(reshape(flip(SFDM, 1),[1, self.elem_type*2]) .* self.positions, [2, self.elem_type]),2);
+                J = [temp1(1), temp2(1); temp2(2), temp1(2)];
+                
+                SFH = self.getShapeFunctions();
+                SFM = SFH(k,n);
+                r = r + reshape(repmat(SFM,2,1),[2*self.elem_type,1]) * det(J);
+
+            end
+            r = repmat(self.bforce,self.elem_type,1) .* r;
+            
         end
 
     end
