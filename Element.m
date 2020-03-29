@@ -14,7 +14,9 @@ classdef Element < handle
        local_loading_vector = NaN;
        local_mass_matrix = NaN;
        local_displacement_vector = NaN;
+       local_stress_IP = NaN;
        bforce = zeros(2,1);
+       nIntPts = NaN;
     end
     methods
         % Constructor for Element object
@@ -24,6 +26,7 @@ classdef Element < handle
             assert(ps == 1 | ps == 2, "Must choose (1) Plane strain OR (2) Plane stress !")
             assert(nIntPts == 4 | nIntPts == 9, "Only implemented Gaussian quadrature rules for 4 and 9 point integration !")
             self.elem_num = elem_num;
+            self.nIntPts = nIntPts;
             self.local_num = local_num;
             self.positions = pos;
             self.elem_type = nen;
@@ -49,6 +52,7 @@ classdef Element < handle
             self.local_loading_vector = self.generateLoadingVector();
             self.local_mass_matrix = self.generateMassMatrix();
             self.local_displacement_vector = zeros(2*self.elem_type);
+            self.local_stress_IP = zeros(nIntPts, 3);
         end
         
         % Returns the Shape Functions depending on the type of element at hand
@@ -225,9 +229,12 @@ classdef Element < handle
                 k = ipos(iter,1); n = ipos(iter,2); w = iweights(iter);
                 J = self.getJ(k,n);
                 SFM = SFH(k,n); % shape function matrix
-                                   
+                
+                self.local_stress_IP(iter,:) = self.elem_D * self.getB(k,n) * ... 
+                    self.local_displacement_vector; % Save stress computation along the way
+                
                 r = r + reshape(repmat(SFM,3,1),[3*self.elem_type,1]) .* ...
-                    reshape(repmat(self.elem_D * self.getB(k,n) * self.local_displacement_vector,self.elem_type,1), [self.elem_type*3,1]) * ...
+                    reshape(repmat(self.local_stress_IP(iter,:)',self.elem_type,1), [self.elem_type*3,1]) * ...
                     det(J) * w;
             end
         
@@ -241,6 +248,27 @@ classdef Element < handle
             globalidx = 3*(reshape(repmat(self.local_num,3,1),[self.elem_type*3,1]) - 1) + 1 + yyidx + xyidx;
             r(globalidx) = self.getLocalProjectionVector();
 
+        end
+        
+        % Returns local reaction force vector for each element
+        function r = generateLocalRFVector(self)
+            r = self.local_stiffness_matrix * self.local_displacement_vector ...
+                    - self.local_loading_vector;  
+        end
+        
+        % Returns local reaction force vector in global form
+        function r = getGlobalRFVector(self, m)
+            r = zeros(m,1);
+            globalidx =  2*(reshape(repmat(self.local_num,2,1),[self.elem_type*2,1]) - 1) + 1 + cast(mod((1:self.elem_type*2) - 1, 2)', 'uint32');
+            r(globalidx) = self.generateLocalRFVector();
+        end
+        
+        % Returns stresses at integration points
+        function r = getStressIP(self)
+            r = zeros(self.nIntPts, 5);
+            [kk, nn] = meshgrid(self.int_pos, self.int_pos);
+            r(:,1) = kk(:); r(:,2) = nn(:);
+            r(:, 3:5) = self.local_stress_IP;  
         end
         
     end
