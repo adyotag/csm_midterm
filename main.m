@@ -1,6 +1,6 @@
 % Read in filetype
 [node, element, elemType, nel, nen, nIntPts,nnd,ps, nu, E, Force_Node, bforce, disp_BC] = ...
-                Read_input("Beam_Bending_Q9_16x4_PU.txt");
+                Read_input("Biaxial_Q4_2x2.txt");
 
 % Construct each element
 elemList = [];
@@ -36,7 +36,23 @@ f_global = f_global(mask);
 
 % Reassemble final solution
 d_global = zeros(2*nnd,1);
-d_global(mask) = inv(k_global)*f_global; d_global(~mask) = dispamt;
+d_global(mask) = k_global\f_global;
+d_global(globaleqns) = dispamt;
+
+% Update local displacements for each element
+for i = 1:nel
+   elemList(i).updateLocalDisplacements(d_global); 
+end
+
+% Compute Nodal Stresses
+m_global = zeros(3*nnd);
+p_global = zeros(3*nnd,1);
+for i = 1:nel
+    m_global = m_global + elemList(i).getGlobalMassMatrix(3*nnd);
+    p_global = p_global + elemList(i).getGlobalProjectionVector(3*nnd);
+end
+n_stress = m_global\p_global;
+
 
 
 
