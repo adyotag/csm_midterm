@@ -1,6 +1,7 @@
 % Read in filetype
+filetype = "Biaxial_Q4_2x2.txt"
 [node, element, elemType, nel, nen, nIntPts,nnd,ps, nu, E, Force_Node, bforce, disp_BC] = ...
-                Read_input("Biaxial_Q4_2x2.txt");
+                Read_input(filetype);
 
 % Construct each element. Preallocating space for objects seems like a rabbit hole ;-)
 elemList = [];
@@ -72,7 +73,7 @@ farr(:,1) = 1:nnd; farr(:,2:3) = node;
 farr(:, 4:5) = reshape(d_global',[2,nnd])';
 farr(:, 6:end) = reshape(n_stress',[3,nnd])';
 
-fileID = fopen('NodalStressAndDisp.txt','w');
+fileID = fopen('NodalStressAndDisp_'+filetype+'.txt','w');
 fprintf(fileID, '|\tNode_Num\t|\tX\t|\tY\t|\tX_Disp\t|\tY_Disp\t|\tNode_Str_XX\t|\tNode_Str_YY\t|\tNode_Str_XY\t|\n\n');
 fprintf(fileID, '%9d\t\t%7.2f\t%7.2f\t%10.5f\t%10.5f\t\t%10.5f\t\t%10.5f\t\t%10.5f\n', farr');
 fclose(fileID);
@@ -85,16 +86,10 @@ for i = 1:nel
     farr(row_start:row_end, 2:end) = elemList(i).getStressIP();
 end
 
-fileID = fopen('IPStresses.txt','w');
+fileID = fopen('IPStresses_'+filetype+'.txt','w');
 fprintf(fileID, '|\tElem_Num\t|\tIP_X\t|\tIP_Y\t|\tNode_Str_XX\t|\tNode_Str_YY\t|\tNode_Str_XY\t|\n\n');
 fprintf(fileID, '%9d\t\t%11.5f\t%10.5f\t\t%10.5f\t\t%10.5f\t\t%10.5f\n', farr');
 fclose(fileID);
-
-
-
-
-
-
 
 
 
