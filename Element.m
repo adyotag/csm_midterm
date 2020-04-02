@@ -2,6 +2,7 @@ classdef Element < handle
     % Each element has these attributes
     properties
        elem_num = 0;
+       elem_name = NaN;
        elem_type = 0;
        lambda = 0;
        mu = 0;
@@ -17,19 +18,20 @@ classdef Element < handle
        local_stress_IP = NaN;
        bforce = zeros(2,1);
        nIntPts = NaN;
+       shiftamt = 0;
     end
     methods
         % Constructor for Element object
-        function self = Element(elem_num, local_num, pos, nen, nIntPts, ps, E, nu, bforce)
+        function self = Element(elem_name, elem_num, local_num, pos, nen, nIntPts, ps, E, nu, bforce)
             assert(nen==4 | nen==8 | nen==9 , "Improper Element type !");
             assert(length(pos)==2*length(local_num), "Global node number and node position arrays not same length !");
             assert(ps == 1 | ps == 2, "Must choose (1) Plane strain OR (2) Plane stress !")
             assert(nIntPts == 4 | nIntPts == 9, "Only implemented Gaussian quadrature rules for 4 and 9 point integration !")
             self.elem_num = elem_num;
+            self.elem_name = elem_name;
             self.nIntPts = nIntPts;
-            self.local_num = local_num;
-            self.positions = pos;
             self.elem_type = nen;
+            [self.local_num, self.positions] = self.rollNAC(local_num, pos);
             self.bforce(2) = bforce;    % y-component only specified in body force
             self.lambda = E*nu/((1.+nu)*(1.-2.*nu));
             self.mu = E/(2*(1+nu));
@@ -54,6 +56,35 @@ classdef Element < handle
             self.local_displacement_vector = zeros(2*self.elem_type);
             self.local_stress_IP = zeros(nIntPts, 3);
         end
+        
+        % Rolls position and connectivity matrices accordingly to match implementation
+        function [r,s] = rollNAC(self, local_num, pos)
+            pos2d = reshape(pos, [2, self.elem_type]);
+            shiftamt = 4:-1:1; 
+            if self.elem_type == 4
+               mask = all(pos2d == [min(pos2d(1,:)); min(pos2d(2,:))], 1);
+               self.shiftamt = shiftamt(mask);
+               r = circshift(local_num, self.shiftamt);             
+               s = circshift(pos2d, self.shiftamt, 2); s= s(:)';           
+           elseif self.elem_type == 8
+               corners = pos2d(:, 1:4); mids = pos2d(:, 5:8);
+               corners_gn = local_num(1:4); mids_gn = local_num(5:8);
+               mask = all(corners == [min(corners(1,:)); min(corners(2,:))], 1);
+               self.shiftamt = shiftamt(mask);
+               r = [circshift(corners_gn, self.shiftamt), circshift(mids_gn, self.shiftamt)];
+               s = [circshift(corners, self.shiftamt, 2), circshift(mids, self.shiftamt, 2)];
+               r = r(:)'; s = s(:)';
+           elseif self.elem_type == 9
+               corners = pos2d(:, 1:4); mids = pos2d(:, 5:8); center = pos2d(:, 9);
+               corners_gn = local_num(1:4); mids_gn = local_num(5:8); center_gn = local_num(9);
+               mask = all(corners == [min(corners(1,:)); min(corners(2,:))], 1);
+               self.shiftamt = shiftamt(mask);
+               r = [circshift(corners_gn, self.shiftamt), circshift(mids_gn, self.shiftamt), center_gn];
+               s = [circshift(corners, self.shiftamt, 2), circshift(mids, self.shiftamt, 2), center];
+               r = r(:)'; s = s(:)';
+           end
+        end
+        
         
         % Returns the Shape Functions depending on the type of element at hand
         function r = getShapeFunctions(self)
@@ -162,18 +193,17 @@ classdef Element < handle
         
         % Returns local loading vector in the global vector 
         function r = getGlobalLoading(self, m)
-            r = zeros(m,1);
+            r = zeros(m,1);  
             globalidx =  2*(reshape(repmat(self.local_num,2,1),[self.elem_type*2,1]) - 1) + 1 + cast(mod((1:self.elem_type*2) - 1, 2)', 'uint32');     
             r(globalidx) = self.local_loading_vector;
 
         end
 
         % Updates the local displacements of each element after computation for post processing
-        function r = updateLocalDisplacements(self, d)
+        function updateLocalDisplacements(self, d)
             global_idx = 2*(reshape(repmat(self.local_num,2,1),[self.elem_type*2,1]) - 1) + 1 + cast(mod((1:self.elem_type*2) - 1, 2)', 'uint32');
             self.local_displacement_vector = d(global_idx);
             self.local_displacement_vector;
-            r = NaN;
         end
         
         % Generates local mass matrix
