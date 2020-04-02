@@ -30,8 +30,10 @@ classdef Element < handle
             self.elem_num = elem_num;
             self.elem_name = elem_name;
             self.nIntPts = nIntPts;
-            self.elem_type = nen;
-            [self.local_num, self.positions] = self.rollNAC(local_num, pos);
+            self.elem_type = nen;            
+            self.local_num = local_num;
+            self.positions = pos;
+            self.rollSF();
             self.bforce(2) = bforce;    % y-component only specified in body force
             self.lambda = E*nu/((1.+nu)*(1.-2.*nu));
             self.mu = E/(2*(1+nu));
@@ -58,30 +60,21 @@ classdef Element < handle
         end
         
         % Rolls position and connectivity matrices accordingly to match implementation
-        function [r,s] = rollNAC(self, local_num, pos)
-            pos2d = reshape(pos, [2, self.elem_type]);
-            shiftamt = 4:-1:1; 
+        function rollSF(self)
+            pos2d = reshape(self.positions, [2, self.elem_type]);
+            shiftamt = 0:3; 
             if self.elem_type == 4
                mask = all(pos2d == [min(pos2d(1,:)); min(pos2d(2,:))], 1);
                self.shiftamt = shiftamt(mask);
-               r = circshift(local_num, self.shiftamt);             
-               s = circshift(pos2d, self.shiftamt, 2); s= s(:)';           
            elseif self.elem_type == 8
                corners = pos2d(:, 1:4); mids = pos2d(:, 5:8);
-               corners_gn = local_num(1:4); mids_gn = local_num(5:8);
                mask = all(corners == [min(corners(1,:)); min(corners(2,:))], 1);
                self.shiftamt = shiftamt(mask);
-               r = [circshift(corners_gn, self.shiftamt), circshift(mids_gn, self.shiftamt)];
-               s = [circshift(corners, self.shiftamt, 2), circshift(mids, self.shiftamt, 2)];
-               r = r(:)'; s = s(:)';
-           elseif self.elem_type == 9
+
+            elseif self.elem_type == 9
                corners = pos2d(:, 1:4); mids = pos2d(:, 5:8); center = pos2d(:, 9);
-               corners_gn = local_num(1:4); mids_gn = local_num(5:8); center_gn = local_num(9);
                mask = all(corners == [min(corners(1,:)); min(corners(2,:))], 1);
                self.shiftamt = shiftamt(mask);
-               r = [circshift(corners_gn, self.shiftamt), circshift(mids_gn, self.shiftamt), center_gn];
-               s = [circshift(corners, self.shiftamt, 2), circshift(mids, self.shiftamt, 2), center];
-               r = r(:)'; s = s(:)';
            end
         end
         
@@ -89,27 +82,37 @@ classdef Element < handle
         % Returns the Shape Functions depending on the type of element at hand
         function r = getShapeFunctions(self)
             if self.elem_type == 4 % Correct
-                r = @(k, n) 0.25*[(1-k)*(1-n), (1+k)*(1-n), (1+k)*(1+n), (1-k)*(1+n)];
+                r = @(k, n) circshift( ...
+                    0.25*[(1-k)*(1-n), (1+k)*(1-n), (1+k)*(1+n), (1-k)*(1+n)], self.shiftamt);
             elseif self.elem_type == 8 % Correct
-                r = @(k, n) [0.25*(k-1)*(1-n)*(1+k+n), 0.25*(1+k)*(n-1)*(1-k+n), 0.25*(1+k)*(1+n)*(-1+k+n), 0.25*(k-1)*(1+n)*(1+k-n),  ...
-                            0.5*(1-k^2)*(1-n), 0.5*(1+k)*(1-n^2) , 0.5*(1-k^2)*(1+n), 0.5*(1-k)*(1-n^2) ];
+                r = @(k, n) circshift( ...
+                    [0.25*(k-1)*(1-n)*(1+k+n), 0.25*(1+k)*(n-1)*(1-k+n), 0.25*(1+k)*(1+n)*(-1+k+n), 0.25*(k-1)*(1+n)*(1+k-n),  ...
+                     0.5*(1-k^2)*(1-n), 0.5*(1+k)*(1-n^2) , 0.5*(1-k^2)*(1+n), 0.5*(1-k)*(1-n^2) ], ...
+                     self.shiftamt);
             elseif self.elem_type == 9 % Correct
-                r = @(k, n) [0.25*k*n*(k-1)*(n-1), 0.25*k*n*(k+1)*(n-1), 0.25*k*n*(k+1)*(n+1), 0.25*k*n*(k-1)*(n+1),  ...
-                            0.5*n*(1-n)*(k^2 - 1), 0.5*k*(-k-1)*(n^2 - 1) , 0.5*n*(-n-1)*(k^2 - 1), 0.5*k*(1-k)*(n^2 - 1),  ...
-                            (1-k^2)*(1-n^2) ];
+                r = @(k, n) circshift( ...
+                    [0.25*k*n*(k-1)*(n-1), 0.25*k*n*(k+1)*(n-1), 0.25*k*n*(k+1)*(n+1), 0.25*k*n*(k-1)*(n+1),  ...
+                     0.5*n*(1-n)*(k^2 - 1), 0.5*k*(-k-1)*(n^2 - 1) , 0.5*n*(-n-1)*(k^2 - 1), 0.5*k*(1-k)*(n^2 - 1),  ...
+                     (1-k^2)*(1-n^2) ], self.shiftamt);
             end
+            
         end
 
         % Returns the derivatives of the Shape Functions depending on the type of element at hand
         function r = getShapeFunctionsD(self)
             if self.elem_type == 4 % Correct
-                r = @(k,n) 0.25 * [n-1, 1-n, 1+n, -1-n; k-1, -1-k, 1+k, 1-k];
+                r = @(k,n) 0.25 * circshift( ...
+                    [n-1, 1-n, 1+n, -1-n; k-1, -1-k, 1+k, 1-k], self.shiftamt, 2);
             elseif self.elem_type == 8 % Correct
-                r = @(k,n) [0.25*(1-n)*(2*k+n), 0.25*(1-n)*(2*k-n), 0.25*(1+n)*(2*k+n), 0.25*(1+n)*(2*k-n), k*(n-1), 0.5*(1-n*n), k*(-n-1), 0.5*(-1+n*n); ...
-                            0.25*(1-k)*(2*n+k), 0.25*(1+k)*(2*n-k), 0.25*(1+k)*(2*n+k), 0.25*(1-k)*(2*n-k), 0.5*(-1+k*k), n*(-k-1), 0.5*(1-k*k), n*(k-1)];
+                r = @(k,n) circshift(  ...
+                    [0.25*(1-n)*(2*k+n), 0.25*(1-n)*(2*k-n), 0.25*(1+n)*(2*k+n), 0.25*(1+n)*(2*k-n), k*(n-1), 0.5*(1-n*n), k*(-n-1), 0.5*(-1+n*n); ...
+                     0.25*(1-k)*(2*n+k), 0.25*(1+k)*(2*n-k), 0.25*(1+k)*(2*n+k), 0.25*(1-k)*(2*n-k), 0.5*(-1+k*k), n*(-k-1), 0.5*(1-k*k), n*(k-1)], ...
+                     self.shiftamt, 2);
             elseif self.elem_type == 9
-                r = @(k,n) [0.25*n*(2*k-1)*(n-1), 0.25*n*(2*k+1)*(n-1), 0.25*n*(2*k+1)*(n+1), 0.25*n*(2*k-1)*(n+1), k*n*(1-n), 0.5*(2*k+1)*(1-n^2), -k*n*(n+1), 0.5*(1-2*k)*(n^2-1), 2*k*(n^2-1); ...
-                            0.25*k*(2*n-1)*(k-1), 0.25*k*(k+1)*(2*n-1), 0.25*k*(2*n+1)*(k+1), 0.25*k*(2*n+1)*(k-1), 0.5*(k^2-1)*(1-2*n), -n*k*(k+1), 0.5*(2*n+1)*(1-k^2), n*k*(1-k), 2*n*(k^2-1) ];
+                r = @(k,n) circshift(  ...
+                    [0.25*n*(2*k-1)*(n-1), 0.25*n*(2*k+1)*(n-1), 0.25*n*(2*k+1)*(n+1), 0.25*n*(2*k-1)*(n+1), k*n*(1-n), 0.5*(2*k+1)*(1-n^2), -k*n*(n+1), 0.5*(1-2*k)*(n^2-1), 2*k*(n^2-1); ...
+                     0.25*k*(2*n-1)*(k-1), 0.25*k*(k+1)*(2*n-1), 0.25*k*(2*n+1)*(k+1), 0.25*k*(2*n+1)*(k-1), 0.5*(k^2-1)*(1-2*n), -n*k*(k+1), 0.5*(2*n+1)*(1-k^2), n*k*(1-k), 2*n*(k^2-1) ], ...
+                     self.shiftamt, 2);
             end
         end
         
