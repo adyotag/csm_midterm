@@ -1,5 +1,5 @@
-
 function [node, element, elemType, nel, nen, nIntPts,nnd,ps, nu, E, Force_Node, bforce, disp_BC]=Read_input(filename)
+
 % you can remove the two cd ../ line if your files are in the same
 % directories
 %cd ../file
