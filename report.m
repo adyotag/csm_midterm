@@ -1107,5 +1107,83 @@ fprintf("inaccurate/incorrect answers.");
 
 
 %% Part B
-fprintf("Did not enough time to answer this one. Sorry");
+clear; close all; clc; clean;
 
+% First load assemblies
+A4 = Assembly("Beam_Bending_Q4_16x4_PU.txt"); % 16x4, 4-node
+A8 = Assembly("Beam_Bending_Q4_16x8_PU.txt"); % 16x4, 4-node
+A9 = Assembly("Beam_Bending_Q9_16x4_PU.txt"); % 16x4, 4-node
+
+% Set Poisson ratio accordingly
+A4.nu = 0.4999; A8.nu = 0.4999; A9.nu = 0.4999; 
+
+assem_list = [A4, A8, A9];
+
+for iter = 1:length(assem_list)
+   assem_list(iter).run();
+end
+
+nsad4 = A4.farr_nsad; nsad8 = A8.farr_nsad; nsad9 = A9.farr_nsad;
+ips4 = A4.farr_ips; ips8 = A8.farr_ips; ips9 = A9.farr_ips;
+
+% Neutral Axis
+nd4 = nsad4(:,2:5);
+namask4 = nd4(:, 2) == 0.5;
+d4 = nd4(namask4,3:4);
+x4 = nd4(namask4,1);
+
+nd8 = nsad8(:,2:5);
+namask8 = nd8(:, 2) == 0.5;
+d8 = nd8(namask8,3:4);
+x8 = nd8(namask8,1);
+
+nd9 = nsad9(:,2:5);
+namask9 = nd9(:, 2) == 0.5;
+d9 = nd9(namask9,3:4);
+x9 = nd9(namask9,1);
+
+figure()
+scatter(x8, d8(:,1));    hold on
+scatter(x9, d9(:,1));
+scatter(x4, d4(:,1));
+legend('Q4, 16x4', 'Q4, 16x8', 'Q9 16x4');
+title('X-Displacement Along Neutral Axis for PU 16x4 for different assemblies');
+xlabel('X, along neutral axis'); ylabel('x-displacement');
+
+figure()
+scatter(x8, d8(:,2));    hold on
+scatter(x9, d9(:,2));
+scatter(x4, d4(:,2));
+legend('Q4, 16x4', 'Q4, 16x8', 'Q9 16x4');
+title('Y-Displacement Along Neutral Axis for PU 16x4 for different assemblies');
+xlabel('Y, along neutral axis'); ylabel('y-displacement');
+
+
+% A to A'
+nd4 = nsad4(:,2:3); sxx4 = nsad4(:,6);
+namask4 = nd4(:,1) == 6.0;
+s4 = sxx4(namask4);
+y4 = nd4(namask4,2);
+
+nd8 = nsad8(:,2:3); sxx8 = nsad8(:,6);
+namask8 = nd8(:,1) == 6.0;
+s8 = sxx8(namask8);
+y8 = nd8(namask8,2);
+
+nd9= nsad9(:,2:3); sxx9 = nsad9(:,6);
+namask9 = nd9(:,1) == 6.0;
+s9 = sxx9(namask9);
+y9 = nd9(namask9,2);
+
+
+figure()
+scatter(y8, s8);    hold on
+scatter(y9, s9);
+scatter(y4, s4);
+legend('Q4, 16x4', 'Q4, 16x8', 'Q9 16x4');
+title('Bending Stress Along A to A prime for different assemblies');
+xlabel('Y, along A to A prime'); ylabel('Bending Stress');
+
+
+
+%
