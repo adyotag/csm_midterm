@@ -77,8 +77,7 @@ classdef Element < handle
                self.shiftamt = shiftamt(mask);
            end
         end
-        
-        
+           
         % Returns the Shape Functions depending on the type of element at hand
         function r = getShapeFunctions(self)
             if self.elem_type == 4 % Correct
