@@ -18,7 +18,10 @@ classdef Assembly < handle
         n_stress_final = NaN;   % Nodal stress vector
         rf_global_final = NaN;  % Reaction forces experienced at specified nodes
         trf = zeros(2); % total reaction force
-
+        
+        % output attributes
+        farr_nsad = NaN;
+        farr_ips = NaN;
     end
     methods
         function self = Assembly(f)
@@ -103,6 +106,7 @@ classdef Assembly < handle
             farr(:,1) = 1:self.nnd; farr(:,2:3) = self.node;
             farr(:, 4:5) = reshape(d_global',[2,self.nnd])';
             farr(:, 6:end) = reshape(n_stress',[3,self.nnd])';
+            self.farr_nsad = farr;
             save("NodalStressAndDisp_"+extractBefore(self.filetype,".")+".mat", 'farr');
             
             fileID = fopen('NodalStressAndDisp_'+self.filetype,'w');
@@ -117,6 +121,7 @@ classdef Assembly < handle
                 farr(row_start:row_end,1) = ones(row_end-row_start+1,1)*self.elemList(i).elem_num;
                 farr(row_start:row_end, 2:end) = self.elemList(i).getStressIP();
             end
+            self.farr_ips = farr;
             save("IPStresses_" + extractBefore(self.filetype,".") + ".mat", 'farr'); 
             fileID =fopen("IPStresses_"+self.filetype,'w');
             fprintf(fileID, '|\tElem_Num\t|\tIP_X\t|\tIP_Y\t|\tNode_Str_XX\t|\tNode_Str_YY\t|\tNode_Str_XY\t|\n\n');
@@ -139,6 +144,15 @@ classdef Assembly < handle
               r(i:(i+self.nIntPts-1),:) = self.elemList(floor(i/self.nIntPts)+1).getRealIPs();
            end
            
+        end
+        
+        % Get displacement at center elements
+        function r = getDispAtCenter(self)
+            r = zeros(self.nel, 2);
+            for i = 1:self.nel
+               r(i,:) = self.elemList(i).getDispInCtr(); 
+            end
+  
         end
         
     end

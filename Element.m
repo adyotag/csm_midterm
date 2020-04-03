@@ -302,6 +302,13 @@ classdef Element < handle
             r(:,1) = kk(:); r(:,2) = nn(:);
             r(:, 3:5) = self.local_stress_IP;  
         end
+       
+        % Returns displacement at center of element
+        function r = getDispInCtr(self)
+            SFH = self.getShapeFunctions(); SFM = SFH(0,0);
+            product = repmat(SFM, 2,1) .* reshape(self.local_displacement_vector, [2, self.elem_type]);
+            r = sum(product, 2);
+        end        
         
         % Returns actual IP points in terms of x and y
         function r = getRealIPs(self)
