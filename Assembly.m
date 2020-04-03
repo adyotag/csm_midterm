@@ -10,7 +10,14 @@ classdef Assembly < handle
         bforce = 0; disp_BC = NaN;
 
         % assembly attributes
-        trf = zeros(2);
+        k_global_final = NaN;   % Global stiffness
+        f_global_final = NaN;   % global loading vector
+        d_global_final = NaN;   % global displacements
+        m_global_final = NaN;   % Global mass matrix
+        p_global_final = NaN;   % Global projection vector
+        n_stress_final = NaN;   % Nodal stress vector
+        rf_global_final = NaN;  % Reaction forces experienced at specified nodes
+        trf = zeros(2); % total reaction force
 
     end
     methods
@@ -55,6 +62,8 @@ classdef Assembly < handle
             f_global = f_global(mask);
 
             % Reassemble final solution
+            self.k_global_final = k_global;
+            self.f_global_final = f_global;
             d_global = zeros(2*self.nnd,1);
             d_global(mask) = k_global\f_global;
             d_global(globaleqns) = dispamt;
@@ -71,8 +80,10 @@ classdef Assembly < handle
                 m_global = m_global + self.elemList(i).getGlobalMassMatrix(3*self.nnd);
                 p_global = p_global + self.elemList(i).getGlobalProjectionVector(3*self.nnd);
             end
+            self.m_global_final = m_global; self.p_global_final = p_global;
             n_stress = m_global\p_global;
-
+            self.n_stress_final = n_stress;
+            
             % Compute Reaction Forces
             rf_global = zeros(2*self.nnd,1);
             num_rf = 2*length(self.Force_Node);
@@ -82,7 +93,8 @@ classdef Assembly < handle
 
             rfgidx = 2*(reshape(repmat(self.Force_Node',2,1),[num_rf,1]) - 1) + 1 + cast(mod((1:num_rf) - 1, 2)', 'uint32');
             rf_global = rf_global(rfgidx);
-
+            self.rf_global_final = rf_global;
+            
             % Compute Total Reaction Force
             self.trf = sum(reshape(rf_global, [2, num_rf/2]),2)';
 
@@ -91,7 +103,6 @@ classdef Assembly < handle
             farr(:,1) = 1:self.nnd; farr(:,2:3) = self.node;
             farr(:, 4:5) = reshape(d_global',[2,self.nnd])';
             farr(:, 6:end) = reshape(n_stress',[3,self.nnd])';
-            % Why is importing textfiles so damn difficult in MATLAB?
             save("NodalStressAndDisp_"+extractBefore(self.filetype,".")+".mat", 'farr');
             
             fileID = fopen('NodalStressAndDisp_'+self.filetype,'w');
@@ -106,7 +117,6 @@ classdef Assembly < handle
                 farr(row_start:row_end,1) = ones(row_end-row_start+1,1)*self.elemList(i).elem_num;
                 farr(row_start:row_end, 2:end) = self.elemList(i).getStressIP();
             end
-            % Why is importing textfiles so damn difficult in MATLAB?
             save("IPStresses_" + extractBefore(self.filetype,".") + ".mat", 'farr'); 
             fileID =fopen("IPStresses_"+self.filetype,'w');
             fprintf(fileID, '|\tElem_Num\t|\tIP_X\t|\tIP_Y\t|\tNode_Str_XX\t|\tNode_Str_YY\t|\tNode_Str_XY\t|\n\n');
@@ -119,6 +129,16 @@ classdef Assembly < handle
         % Function to help read output files. Useful keeping report.m clean
         function r = readout(self)
             r = Read_output(self.filetype);
+        end
+        
+        % Function to get all the integration points in the assembly in the form of X and Y
+        % Contains some extraneous information to aid in report as well
+        function r = getAllIP(self)
+           r = zeros(self.nel*self.nIntPts, 5);
+           for i = 1:self.nIntPts:(self.nel*self.nIntPts)
+              r(i:(i+self.nIntPts-1),:) = self.elemList(floor(i/self.nIntPts)+1).getRealIPs();
+           end
+           
         end
         
     end
