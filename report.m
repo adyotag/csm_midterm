@@ -183,6 +183,11 @@ legend('Q4', 'Q8', 'Q9');
 title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 9-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in y-reaction force');
 
+% Comments
+fprintf("As expected, as we use a finer mesh, or use higher order elements, the error drops.\n");
+fprintf("What is interesting to note is that you don't get much of an error reduction when going from Q8 to Q9.\n");
+fprintf("Finally, we get the linear convergence of error against characteristic length, which is expected.\n")
+fprintf("What I found interesting was that the 4-node integration was slightly more accurate than 9-node integration.\n");
 
 %% Part C
 clean; clear; clc;
@@ -780,8 +785,20 @@ scatter(log_char_size(5), log_error_stress_A(5,2));
 legend('Q4', 'Q8', 'Q9');
 title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 9-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
-%% Part D
 
+
+% Comments
+fprintf("The error in displacement norm is expected, as EB does not predict x displacements, only deflection.");
+fprintf("What is interesting to note is that for the nodal displacements and stresses, Q9 was most accurate for nodal displacements, but was least accurate for bending stress. \n");
+fprintf("Instead, Q4 was most accurate for stress. This is most likely because Q4 has less of a resolution to represent stresses and BC, similar to the EB case. Again, it was expected that \n");
+fprintf("using a large mesh (more elements, and thus lower characteristic length) leads to less error. For the shear stress, the Q8 was most \n");
+fprintf("representative of the beam. This could again be because Q8 doesn't have as much resolution as Q9, and can represent shear stress in beam, since that's of order 1 in x.\n")
+fprintf("What I found interesting was that the 4-node integration was slightly more accurate than 9-node integration.\n");
+
+
+%% Part D
+% Comments
+fprintf("I did not have enough time to do this. Sorry")
 
 
 %% Question 2
@@ -867,9 +884,14 @@ legend('v=0.49', 'v=0.4999', 'v=0.4');
 title('Bending Stress Along A to A prime for PU 16x4 Q4');
 xlabel('Y, along A to A prime'); ylabel('Bending Stress');
 
-
+%Comments
+fprintf("For some reason, I couldn't get the plots to work, but I know what happens.\n");
+fprintf("As v becomes closer to 0.5, the element becomes more incompressible. As it becomes more incompressible, the D \n");
+fprintf("matrix starts to blow up, making K become larger. The larger the values are in the matrix, the more ill-conditioned the stiffness matrix becomes. \n");
+fprintf("As a result, K becomes harder to invert. And the inverse becomes really sensitive. So much so that even the smallest numerical inaccuracies lead to \n");
+fprintf("inaccurate/incorrect answers.");
 
 
 %% Part B
-
+fprintf("Did not enough time to answer this one. Sorry");
 
