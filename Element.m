@@ -303,6 +303,20 @@ classdef Element < handle
             r(:, 3:5) = self.local_stress_IP;  
         end
         
+        % Returns actual IP points in terms of x and y
+        function r = getRealIPs(self)
+            r = zeros(self.nIntPts, 2);
+            [kk, nn] = meshgrid(self.int_pos, self.int_pos);
+            kk = kk(:); nn = nn(:); SFH = self.getShapeFunctions();
+            for i = 1:self.nIntPts
+                k = kk(i); n = nn(i);
+                SFM = repmat(SFH(k,n),2,1);
+                r(i, :) = sum(SFM .* reshape(self.positions,[2,self.elem_type]), 2);
+            end
+            elem_arr = self.elem_num * ones(self.nIntPts,1);
+            r = [r, kk, nn, elem_arr];
+        end
+        
     end
     
 end
