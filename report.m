@@ -190,7 +190,7 @@ fprintf("Finally, we get the linear convergence of error against characteristic 
 fprintf("What I found interesting was that the 4-node integration was slightly more accurate than 9-node integration.\n");
 
 %% Part C
-clean; clear; clc;
+clean; clear; clc; close all;
 
 % First we will look at what is happening exactly at Node A
 
@@ -797,8 +797,224 @@ fprintf("What I found interesting was that the 4-node integration was slightly m
 
 
 %% Part D
-% Comments
-fprintf("I did not have enough time to do this. Sorry")
+clear; close all; clc; clean;
+
+% First 4 integration points
+
+% First load the assemblies
+% EB Solution
+q = 2.71E-9 * 9.82E3;
+I = 1./12.; E = 70E3; L = 12;
+alpha = q/(E*I);
+deflection = @(x) (1/6912 - 5*alpha/4.)*(x.^3) + (9*alpha - 1/192)*(x.^2) + (alpha/24.)*(x.^4);
+moment = @(x) E*I*( (1/1152 - 7.5*alpha)*x + (18*alpha - 1/96.) + 0.5*alpha*(x.^2));
+bending_stress_an = @(x, yn) -(moment(x).*yn)/I; bending_stress_LHS = @(yn) bending_stress_an(0, yn);
+shear_stress_an = @(x) -E*I*(alpha*x + 1/1152 - 7.5*alpha);
+reaction_force_an = [integral(bending_stress_LHS, -0.5, 0.5), -shear_stress_an(0)];
+
+% Relevant points
+A = [6., 0.]; Ap = [6. , 1.];
+
+% First load different assemblies
+A441 = Assembly("Beam_Bending_Q4_4x1_Al.txt"); % 4x1, 4-node
+A482 = Assembly("Beam_Bending_Q4_8x2_Al.txt"); % 8x2, 4-node
+A4164 = Assembly("Beam_Bending_Q4_16x4_Al.txt"); % 16x4, 4-node
+A841 = Assembly("Beam_Bending_Q8_4x1_Al.txt"); % 4x1, 4-node
+A941 = Assembly("Beam_Bending_Q9_4x1_Al.txt"); % 4x1, 9-node
+
+assem_list = [A441,A482,A4164, A841, A941]';
+[assem_list.nIntPts] = deal(4);
+
+for iter = 1:length(assem_list)
+   assem_list(iter).run();
+end
+
+
+nsadA441 = A441.farr_nsad; nsadA482 = A482.farr_nsad; nsadA4164 = A4164.farr_nsad;
+nsadA841 = A841.farr_nsad; nsadA941 = A941.farr_nsad;
+
+%A to Ap
+x441 = nsadA441(:, 2); x482 = nsadA482(:, 2);x4164 = nsadA4164(:, 2);
+x841 = nsadA841(:, 2); x941 = nsadA941(:, 2);
+
+y441 = nsadA441(:, 3); y482 = nsadA482(:, 3);y4164 = nsadA4164(:, 3);
+y841 = nsadA841(:, 3);y941 = nsadA941(:, 3);
+
+yd441 = nsadA441(:, 5); yd482 = nsadA482(:, 5); yd4164 = nsadA4164(:, 5);
+yd841 = nsadA841(:, 5);yd941 = nsadA941(:, 5);
+
+sxx441 = nsadA441(:, 6); sxx482 = nsadA482(:, 6); sxx4164 = nsadA4164(:, 6);
+sxx841 = nsadA841(:, 6);sxx941 = nsadA941(:, 6);
+
+sxy441 = nsadA441(:, 8); sxy482 = nsadA482(:, 8); sxy4164 = nsadA4164(:, 8);
+sxy841 = nsadA841(:, 8);sxy941 = nsadA941(:, 8);
+
+
+maskaa441 = x441==6;
+maskaa482 = x482==6;
+maskaa4164 = x4164==6;
+maskaa841 = x841==6;
+maskaa941 = x941==6;
+
+bendy = -0.5:0.1:0.5; bendx = 6;
+
+
+figure()
+plot(y441(maskaa441), sxx441(maskaa441)); hold on
+plot(y482(maskaa482), sxx482(maskaa482));
+plot(y4164(maskaa4164), sxx4164(maskaa4164));
+plot(y841(maskaa841), sxx841(maskaa841));
+plot(y941(maskaa941), sxx941(maskaa941));
+plot(bendy+0.5,bending_stress_an(bendx, bendy) )
+legend('441', '482', '4164', '841', '941', 'EB');
+title('Bending Stress for Different Assemblies from A to Ap, 4 IP', 'interpreter', 'latex');
+xlabel('y, distance along y'); ylabel('$$\sigma_{xx}$$, Bending Stress', 'interpreter', 'latex');
+
+
+figure()
+plot(y441(maskaa441), sxy441(maskaa441)); hold on
+plot(y482(maskaa482), sxy482(maskaa482));
+plot(y4164(maskaa4164), sxy4164(maskaa4164));
+plot(y841(maskaa841), sxy841(maskaa841));
+plot(y941(maskaa941), sxy941(maskaa941));
+plot(bendy+0.5, shear_stress_an(bendx) )
+legend('441', '482', '4164', '841', '941', 'EB');
+title('Shear Stress for Different Assemblies from A to Ap, 4 IP', 'interpreter', 'latex');
+xlabel('y, distance along y'); ylabel('$$\sigma_{xy}$$, Bending Stress', 'interpreter', 'latex');
+
+
+% Compute displacement at y=0.5 
+nad441 = A441.getDispAtCenter(); nad441 = nad441(:,2);
+nad841 = A841.getDispAtCenter(); nad841 = nad841(:,2);
+nad941 = A941.getDispAtCenter(); nad941 = nad941(:,2);
+nad482 = yd482(y482 == 0.5); xx482 = x482(y482 == 0.5);
+nad4164 = yd4164(y4164 == 0.5); xx4164 = x4164(y4164 == 0.5);
+xx41 = (12/A441.nel) * (1:A441.nel) - (6/A441.nel);
+
+bendx = 0.:1.0:12.; bendy = 0.;
+
+figure()
+plot(xx41, nad441); hold on
+plot(xx482, nad482);
+plot(xx4164, nad4164);
+plot(xx41, nad841);
+plot(xx41, nad941);
+plot(bendx, deflection(bendx) );
+legend('441', '482', '4164', '841', '941', 'EB');
+title('y displacement for Different Assemblies along NA, 4 IP', 'interpreter', 'latex');
+xlabel('x, distance along x'); ylabel('$$u_y$$, y displacements', 'interpreter', 'latex');
+
+
+clear; clc; clean;
+
+% Now 9 Integration points
+
+% First load the assemblies
+% EB Solution
+q = 2.71E-9 * 9.82E3;
+I = 1./12.; E = 70E3; L = 12;
+alpha = q/(E*I);
+deflection = @(x) (1/6912 - 5*alpha/4.)*(x.^3) + (9*alpha - 1/192)*(x.^2) + (alpha/24.)*(x.^4);
+moment = @(x) E*I*( (1/1152 - 7.5*alpha)*x + (18*alpha - 1/96.) + 0.5*alpha*(x.^2));
+bending_stress_an = @(x, yn) -(moment(x).*yn)/I; bending_stress_LHS = @(yn) bending_stress_an(0, yn);
+shear_stress_an = @(x) -E*I*(alpha*x + 1/1152 - 7.5*alpha);
+reaction_force_an = [integral(bending_stress_LHS, -0.5, 0.5), -shear_stress_an(0)];
+
+% Relevant points
+A = [6., 0.]; Ap = [6. , 1.];
+
+% First load different assemblies
+A441 = Assembly("Beam_Bending_Q4_4x1_Al.txt"); % 4x1, 4-node
+A482 = Assembly("Beam_Bending_Q4_8x2_Al.txt"); % 8x2, 4-node
+A4164 = Assembly("Beam_Bending_Q4_16x4_Al.txt"); % 16x4, 4-node
+A841 = Assembly("Beam_Bending_Q8_4x1_Al.txt"); % 4x1, 4-node
+A941 = Assembly("Beam_Bending_Q9_4x1_Al.txt"); % 4x1, 9-node
+
+assem_list = [A441,A482,A4164, A841, A941]';
+[assem_list.nIntPts] = deal(9);
+
+for iter = 1:length(assem_list)
+   assem_list(iter).run();
+end
+
+
+nsadA441 = A441.farr_nsad; nsadA482 = A482.farr_nsad; nsadA4164 = A4164.farr_nsad;
+nsadA841 = A841.farr_nsad; nsadA941 = A941.farr_nsad;
+
+%A to Ap
+x441 = nsadA441(:, 2); x482 = nsadA482(:, 2);x4164 = nsadA4164(:, 2);
+x841 = nsadA841(:, 2); x941 = nsadA941(:, 2);
+
+y441 = nsadA441(:, 3); y482 = nsadA482(:, 3);y4164 = nsadA4164(:, 3);
+y841 = nsadA841(:, 3);y941 = nsadA941(:, 3);
+
+yd441 = nsadA441(:, 5); yd482 = nsadA482(:, 5); yd4164 = nsadA4164(:, 5);
+yd841 = nsadA841(:, 5);yd941 = nsadA941(:, 5);
+
+sxx441 = nsadA441(:, 6); sxx482 = nsadA482(:, 6); sxx4164 = nsadA4164(:, 6);
+sxx841 = nsadA841(:, 6);sxx941 = nsadA941(:, 6);
+
+sxy441 = nsadA441(:, 8); sxy482 = nsadA482(:, 8); sxy4164 = nsadA4164(:, 8);
+sxy841 = nsadA841(:, 8);sxy941 = nsadA941(:, 8);
+
+
+maskaa441 = x441==6;
+maskaa482 = x482==6;
+maskaa4164 = x4164==6;
+maskaa841 = x841==6;
+maskaa941 = x941==6;
+
+bendy = -0.5:0.1:0.5; bendx = 6;
+
+
+figure()
+plot(y441(maskaa441), sxx441(maskaa441)); hold on
+plot(y482(maskaa482), sxx482(maskaa482));
+plot(y4164(maskaa4164), sxx4164(maskaa4164));
+plot(y841(maskaa841), sxx841(maskaa841));
+plot(y941(maskaa941), sxx941(maskaa941));
+plot(bendy+0.5,bending_stress_an(bendx, bendy) )
+legend('441', '482', '4164', '841', '941', 'EB');
+title('Bending Stress for Different Assemblies from A to Ap, 9 IP', 'interpreter', 'latex');
+xlabel('y, distance along y'); ylabel('$$\sigma_{xx}$$, Bending Stress', 'interpreter', 'latex');
+
+
+figure()
+plot(y441(maskaa441), sxy441(maskaa441)); hold on
+plot(y482(maskaa482), sxy482(maskaa482));
+plot(y4164(maskaa4164), sxy4164(maskaa4164));
+plot(y841(maskaa841), sxy841(maskaa841));
+plot(y941(maskaa941), sxy941(maskaa941));
+plot(bendy+0.5, shear_stress_an(bendx) )
+legend('441', '482', '4164', '841', '941', 'EB');
+title('Shear Stress for Different Assemblies from A to Ap, 9 IP', 'interpreter', 'latex');
+xlabel('y, distance along y'); ylabel('$$\sigma_{xy}$$, Bending Stress', 'interpreter', 'latex');
+
+
+% Compute displacement at y=0.5 
+nad441 = A441.getDispAtCenter(); nad441 = nad441(:,2);
+nad841 = A841.getDispAtCenter(); nad841 = nad841(:,2);
+nad941 = A941.getDispAtCenter(); nad941 = nad941(:,2);
+nad482 = yd482(y482 == 0.5); xx482 = x482(y482 == 0.5);
+nad4164 = yd4164(y4164 == 0.5); xx4164 = x4164(y4164 == 0.5);
+xx41 = (12/A441.nel) * (1:A441.nel) - (6/A441.nel);
+
+bendx = 0.:1.0:12.; bendy = 0.;
+
+figure()
+plot(xx41, nad441); hold on
+plot(xx482, nad482);
+plot(xx4164, nad4164);
+plot(xx41, nad841);
+plot(xx41, nad941);
+plot(bendx, deflection(bendx) );
+legend('441', '482', '4164', '841', '941', 'EB');
+title('y displacement for Different Assemblies along NA, 9 IP', 'interpreter', 'latex');
+xlabel('x, distance along x'); ylabel('$$u_y$$, y displacements', 'interpreter', 'latex');
+
+
+
+
 
 
 %% Question 2
@@ -819,9 +1035,9 @@ for iter = 1:length(assem_list)
    assem_list(iter).run();
 end
 
-ro4 = A4.readout(); nsad4 = ro4.nsad();
-ro49 = A49.readout(); nsad49 = ro49.nsad();
-ro4999 = A4999.readout(); nsad4999 = ro4999.nsad();
+nsad4 = A4.farr_nsad; nsad49 = A49.farr_nsad; nsad4999 = A4999.farr_nsad;
+ips4 = A4.farr_ips; ips49 = A49.farr_ips; ips4999 = A4999.farr_ips;
+
 
 % Neutral Axis
 nd4 = nsad4(:,2:5);
@@ -839,22 +1055,19 @@ namask4999 = nd4999(:, 2) == 0.5;
 d4999 = nd4999(namask4999,3:4);
 x4999 = nd4999(namask4999,1);
 
-figure()
-scatter(nd4(:,1)+nd4(:,3), nd4(:,2)+nd4(:,4));
-
 
 figure()
-scatter(x49, d49(:,1));    hold on
-scatter(x4999, d4999(:,1));
-scatter(x4, d4(:,1));
+plot(x49, d49(:,1));    hold on
+plot(x4999, d4999(:,1));
+plot(x4, d4(:,1));
 legend('v=0.49', 'v=0.4999', 'v=0.4');
 title('X-Displacement Along Neutral Axis for PU 16x4 Q4');
 xlabel('X, along neutral axis'); ylabel('x-displacement');
 
 figure()
-scatter(x49, d49(:,2));    hold on
-scatter(x4999, d4999(:,2));
-scatter(x4, d4(:,2));
+plot(x49, d49(:,2));    hold on
+plot(x4999, d4999(:,2));
+plot(x4, d4(:,2));
 legend('v=0.49', 'v=0.4999', 'v=0.4');
 title('Y-Displacement Along Neutral Axis for PU 16x4 Q4');
 xlabel('X, along neutral axis'); ylabel('y-displacement');
@@ -876,10 +1089,11 @@ namask4999 = nd4999(:,1) == 6.0;
 s4999 = sxx4999(namask4999);
 y4999 = nd4999(namask4999,2);
 
+
 figure()
-scatter(y49, s49);    hold on
-scatter(y4999, s4999);
-scatter(y4, s4);
+plot(y49, s49);    hold on
+plot(y4999, s4999);
+plot(y4, s4);
 legend('v=0.49', 'v=0.4999', 'v=0.4');
 title('Bending Stress Along A to A prime for PU 16x4 Q4');
 xlabel('Y, along A to A prime'); ylabel('Bending Stress');
