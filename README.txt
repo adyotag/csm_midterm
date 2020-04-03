@@ -7,7 +7,8 @@ provided with detailed instructions on how to run.
 To run the report, proceed to report.m. This contains sections arranged by question
 number and part. Unfortunately, I couldn't get all the questions done due to
 time constraints, and spending time debugging. Sorry about that. Nut I've answered
-them to the best of my ability.
+them to the best of my ability. Comments are written in print statements, so it should
+appear in the command window.
 
 Finally, if the workspace and files get a bit cluttered, just run "clean" to
 invoke clean.m. This is just a basic tool that removes the output files and saved
