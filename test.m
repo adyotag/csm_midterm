@@ -19,7 +19,7 @@ g = Assembly("Beam_Bending_Q4_16x4_PU.txt");    % load text file
 
 % At this stage, we can still make changes to certain parameters. For example,
 g.nIntPts;
-g.nIntPts = 9;
+g.nIntPts = 4;
 g.nIntPts;
 
 g.run();    % Run calculations
@@ -57,6 +57,16 @@ info = g.readout().nsad();
 
 X = info(:,2); Y = info(:,3);   % Read in X and Y
 XD = info(:,4); YD = info(:,5); % Read in X and Y Displacements
-scatter(X+XD, Y+YD)             % plot of deformed configuration
+SXX = info(:, 6);
+scatter(X+XD, Y+YD, 10, SXX, 'filled')       % plot of deformed configuration with bending stress
+colorbar()
+
+
+
+
+
+
+
+
 
 %
