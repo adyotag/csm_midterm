@@ -116,5 +116,10 @@ classdef Assembly < handle
             r = self;            
         end
         
+        % Function to help read output files. Useful keeping report.m clean
+        function r = readout(self)
+            r = Read_output(self.filetype);
+        end
+        
     end
 end
