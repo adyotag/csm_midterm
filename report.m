@@ -187,6 +187,8 @@ xlabel('l, characteristic length'); ylabel('e, Error in y-reaction force');
 %% Part C
 clean; clear; clc;
 
+% First we will look at what is happening exactly at Node A
+
 % First 4 integration points
 
 % EB Solution
@@ -307,7 +309,7 @@ scatter(log_char_size(2), log_error_stress_A(2,1));
 scatter(log_char_size(3), log_error_stress_A(3,1));
 plot(log_char_size(1:3), log_error_stress_A(1:3,1));
 legend('4x1', '8x2', '16x4')
-title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 Assemblies with 4-Point Integration for Al Q4 Element', 'interpreter', 'latex');
+title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 Assemblies at Node with 4-Point Integration for Al Q4 Element', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xx}$$', 'interpreter', 'latex');
 
 figure();
@@ -315,7 +317,7 @@ scatter(log_char_size(1), log_error_stress_A(1,1)); hold on
 scatter(log_char_size(4), log_error_stress_A(4,1));
 scatter(log_char_size(5), log_error_stress_A(5,1));
 legend('Q4', 'Q8', 'Q9');
-title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 4-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
+title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements at Node with 4-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xx}$$', 'interpreter', 'latex');
 
 % Sigma XY
@@ -325,7 +327,7 @@ scatter(log_char_size(2), log_error_stress_A(2,2));
 scatter(log_char_size(3), log_error_stress_A(3,2));
 plot(log_char_size(1:3), log_error_stress_A(1:3,2));
 legend('4x1', '8x2', '16x4')
-title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 Assemblies with 4-Point Integration for Al Q4 Element', 'interpreter', 'latex');
+title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 Assemblies at Node with 4-Point Integration for Al Q4 Element', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
 
 figure();
@@ -333,7 +335,7 @@ scatter(log_char_size(1), log_error_stress_A(1,2)); hold on
 scatter(log_char_size(4), log_error_stress_A(4,2));
 scatter(log_char_size(5), log_error_stress_A(5,2));
 legend('Q4', 'Q8', 'Q9');
-title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 4-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
+title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements at Node with 4-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
 
 
@@ -459,7 +461,7 @@ scatter(log_char_size(2), log_error_stress_A(2,1));
 scatter(log_char_size(3), log_error_stress_A(3,1));
 plot(log_char_size(1:3), log_error_stress_A(1:3,1));
 legend('4x1', '8x2', '16x4')
-title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 Assemblies with 9-Point Integration for Al Q4 Element', 'interpreter', 'latex');
+title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 Assemblies at Node with 9-Point Integration for Al Q4 Element', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xx}$$', 'interpreter', 'latex');
 
 figure();
@@ -467,7 +469,298 @@ scatter(log_char_size(1), log_error_stress_A(1,1)); hold on
 scatter(log_char_size(4), log_error_stress_A(4,1));
 scatter(log_char_size(5), log_error_stress_A(5,1));
 legend('Q4', 'Q8', 'Q9');
-title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 9-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
+title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements at Node with 9-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
+xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xx}$$', 'interpreter', 'latex');
+
+% Sigma XY
+figure();
+scatter(log_char_size(1), log_error_stress_A(1,2)); hold on
+scatter(log_char_size(2), log_error_stress_A(2,2));
+scatter(log_char_size(3), log_error_stress_A(3,2));
+plot(log_char_size(1:3), log_error_stress_A(1:3,2));
+legend('4x1', '8x2', '16x4')
+title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 Assemblies at Node with 9-Point Integration for Al Q4 Element', 'interpreter', 'latex');
+xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
+
+figure();
+scatter(log_char_size(1), log_error_stress_A(1,2)); hold on
+scatter(log_char_size(4), log_error_stress_A(4,2));
+scatter(log_char_size(5), log_error_stress_A(5,2));
+legend('Q4', 'Q8', 'Q9');
+title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements at Node with 9-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
+xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
+
+
+% Now we will look at what is happening at an IP near Node A
+clean; clear; clc;
+
+% First 4 integration points
+
+% EB Solution
+q = 2.71E-9 * 9.82E3;
+I = 1./12.; E = 70E3; L = 12;
+alpha = q/(E*I);
+deflection = @(x) (1/6912 - 5*alpha/4.)*(x.^3) + (9*alpha - 1/192)*(x.^2) + (alpha/24.)*(x.^4);
+moment = @(x) E*I*( (1/1152 - 7.5*alpha)*x + (18*alpha - 1/96.) + 0.5*alpha*(x.^2));
+bending_stress_an = @(x, yn) -(moment(x).*yn)/I; bending_stress_LHS = @(yn) bending_stress_an(0, yn);
+shear_stress_an = @(x) -E*I*(alpha*x + 1/1152 - 7.5*alpha);
+reaction_force_an = [integral(bending_stress_LHS, -0.5, 0.5), -shear_stress_an(0)];
+
+% Relevant points
+A = [6., 0.];
+
+% First load different assemblies
+A441 = Assembly("Beam_Bending_Q4_4x1_Al.txt"); % 4x1, 4-node
+A482 = Assembly("Beam_Bending_Q4_8x2_Al.txt"); % 8x2, 4-node
+A4164 = Assembly("Beam_Bending_Q4_16x4_Al.txt"); % 16x4, 4-node
+A841 = Assembly("Beam_Bending_Q8_4x1_Al.txt"); % 4x1, 4-node
+A941 = Assembly("Beam_Bending_Q9_4x1_Al.txt"); % 4x1, 9-node
+
+assem_list = [A441,A482,A4164, A841, A941]';
+[assem_list.nIntPts] = deal(4);
+for iter = 1:length(assem_list)
+   assem_list(iter).run();
+end
+
+% !!!   The warning for the badly conditioned matrix isn't from my code:            !!!
+% !!!   try running the benchmark, which goes through each input file provided.     !!!
+
+% Different element sizes
+ro = A441.readout(); nsad = ro.nsad(); ips = ro.ips();
+X441 = ips(:,2); Y441 = ips(:,3);
+SXX441 = ips(:, 4); SYY441 = ips(:, 5); SXY441 = ips(:, 6);
+IP441 = ips(:,1);
+
+ro = A482.readout(); nsad = ro.nsad(); ips = ro.ips();
+X482 = ips(:,2); Y482 = ips(:,3);
+SXX482 = ips(:, 4); SYY482 = ips(:, 5); SXY482 = ips(:, 6);
+IP482 = ips(:,1);
+
+
+ro = A4164.readout(); nsad = ro.nsad(); ips = ro.ips();
+X4164 = ips(:,2); Y4164 = ips(:,3); 
+SXX4164 = ips(:, 4); SYY4164 = ips(:, 5); SXY4164 = ips(:, 6);
+IP4164 = ips(:,1);
+
+% Different nodes
+
+% [ *** "Beam_Bending_Q4_4x1_Al.txt" already processed ! *** ]
+
+ro = A841.readout(); nsad = ro.nsad(); ips = ro.ips();
+X841 = ips(:,2); Y841 = ips(:,3);
+SXX841 = ips(:, 4); SYY841 = ips(:, 5); SXY841 = ips(:, 6);
+IP841 = ips(:,1);
+
+
+ro = A941.readout(); nsad = ro.nsad(); ips = ro.ips();
+X941 = ips(:,2); Y941 = ips(:,3);
+SXX941 = ips(:, 4); SYY941 = ips(:, 5); SXY941 = ips(:, 6);
+IP941 = ips(:,1);
+
+% Now we must find the integration point closest to [6,0]
+every_IP = [A441.getAllIP(); A482.getAllIP(); A4164.getAllIP(); ...
+            A841.getAllIP(); A941.getAllIP()];
+every_IP_dist = every_IP - [A,0,0,0];
+        
+closest_IP = zeros(5,5); track_start = 1;
+for i = 1:length(assem_list)
+     track_end = track_start + assem_list(i).nel*assem_list(i).nIntPts -1;
+     section = every_IP_dist(track_start:track_end,:);
+     real_section = section(:,1:2); distance = vecnorm(real_section');
+     closest_IP(i,:) = section(min(distance)==distance,:) + [A,0,0,0];
+     track_start = track_end+1;
+end
+
+% Now create masks to locate relevant info for each of the closest IP
+maskA441 = (X441 == closest_IP(1,3)) & (Y441 == closest_IP(1,4)) ...
+            & (IP441 == closest_IP(1,5));
+maskA482 = (X482 == closest_IP(2,3)) & (Y482 == closest_IP(2,4)) ...
+            & (IP482 == closest_IP(2,5));
+maskA4164 = (X4164 == closest_IP(3,3)) & (Y4164 == closest_IP(3,4)) ...
+            & (IP4164 == closest_IP(3,5));
+maskA841 = (X841 == closest_IP(4,3)) & (Y841 == closest_IP(4,4)) ...
+            & (IP841 == closest_IP(4,5));
+maskA941 = (X941 == closest_IP(5,3)) & (Y941 == closest_IP(5,4)) ...
+            & (IP941 == closest_IP(5,5));
+
+% Compute errors in nodal stresses at A
+FEM_STRESS_A = [SXX441(maskA441), SXY441(maskA441); ...
+                SXX482(maskA482), SXY482(maskA482); ...
+                SXX4164(maskA4164), SXY4164(maskA4164); ...
+                SXX841(maskA841), SXY841(maskA841); ...
+                SXX941(maskA941), SXY941(maskA941)];
+
+EB_STRESS_A = [bending_stress_an(A(1), A(2)-0.5), shear_stress_an(A(1))];
+
+numer = abs( (FEM_STRESS_A - EB_STRESS_A));
+denom = abs(repmat(EB_STRESS_A, 5,1));
+error_stress_A = numer ./ denom;
+
+log_error_stress_A = log(error_stress_A);
+log_char_size = log([3., 1.5, 0.75, 3., 3.]);
+
+% Plotting
+% Sigma XX
+figure();
+scatter(log_char_size(1), log_error_stress_A(1,1)); hold on
+scatter(log_char_size(2), log_error_stress_A(2,1));
+scatter(log_char_size(3), log_error_stress_A(3,1));
+plot(log_char_size(1:3), log_error_stress_A(1:3,1));
+legend('4x1', '8x2', '16x4')
+title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 at an IP for Assemblies with 4-Point Integration for Al Q4 Element', 'interpreter', 'latex');
+xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xx}$$', 'interpreter', 'latex');
+
+figure();
+scatter(log_char_size(1), log_error_stress_A(1,1)); hold on
+scatter(log_char_size(4), log_error_stress_A(4,1));
+scatter(log_char_size(5), log_error_stress_A(5,1));
+legend('Q4', 'Q8', 'Q9');
+title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements at an IP with 4-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
+xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xx}$$', 'interpreter', 'latex');
+
+% Sigma XY
+figure();
+scatter(log_char_size(1), log_error_stress_A(1,2)); hold on
+scatter(log_char_size(2), log_error_stress_A(2,2));
+scatter(log_char_size(3), log_error_stress_A(3,2));
+plot(log_char_size(1:3), log_error_stress_A(1:3,2));
+legend('4x1', '8x2', '16x4')
+title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 Assemblies with 4-Point Integration for Al Q4 Element', 'interpreter', 'latex');
+xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
+
+figure();
+scatter(log_char_size(1), log_error_stress_A(1,2)); hold on
+scatter(log_char_size(4), log_error_stress_A(4,2));
+scatter(log_char_size(5), log_error_stress_A(5,2));
+legend('Q4', 'Q8', 'Q9');
+title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 4-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
+xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
+
+
+clean; clear; clc;
+% Now with 9 integration points
+
+% EB Solution
+q = 2.71E-9 * 9.82E3;
+I = 1./12.; E = 70E3; L = 12;
+alpha = q/(E*I);
+deflection = @(x) (1/6912 - 5*alpha/4.)*(x.^3) + (9*alpha - 1/192)*(x.^2) + (alpha/24.)*(x.^4);
+moment = @(x) E*I*( (1/1152 - 7.5*alpha)*x + (18*alpha - 1/96.) + 0.5*alpha*(x.^2));
+bending_stress_an = @(x, yn) -(moment(x).*yn)/I; bending_stress_LHS = @(yn) bending_stress_an(0, yn);
+shear_stress_an = @(x) -E*I*(alpha*x + 1/1152 - 7.5*alpha);
+reaction_force_an = [integral(bending_stress_LHS, -0.5, 0.5), -shear_stress_an(0)];
+
+% Relevant points
+A = [6., 0.];
+
+% First load different assemblies
+A441 = Assembly("Beam_Bending_Q4_4x1_Al.txt"); % 4x1, 4-node
+A482 = Assembly("Beam_Bending_Q4_8x2_Al.txt"); % 8x2, 4-node
+A4164 = Assembly("Beam_Bending_Q4_16x4_Al.txt"); % 16x4, 4-node
+A841 = Assembly("Beam_Bending_Q8_4x1_Al.txt"); % 4x1, 4-node
+A941 = Assembly("Beam_Bending_Q9_4x1_Al.txt"); % 4x1, 9-node
+
+assem_list = [A441,A482,A4164, A841, A941]';
+[assem_list.nIntPts] = deal(9);
+for iter = 1:length(assem_list)
+   assem_list(iter).run();
+end
+
+% !!!   The warning for the badly conditioned matrix isn't from my code:            !!!
+% !!!   try running the benchmark, which goes through each input file provided.     !!!
+
+% Different element sizes
+ro = A441.readout(); nsad = ro.nsad(); ips = ro.ips();
+X441 = ips(:,2); Y441 = ips(:,3);
+SXX441 = ips(:, 4); SYY441 = ips(:, 5); SXY441 = ips(:, 6);
+IP441 = ips(:,1);
+
+ro = A482.readout(); nsad = ro.nsad(); ips = ro.ips();
+X482 = ips(:,2); Y482 = ips(:,3);
+SXX482 = ips(:, 4); SYY482 = ips(:, 5); SXY482 = ips(:, 6);
+IP482 = ips(:,1);
+
+
+ro = A4164.readout(); nsad = ro.nsad(); ips = ro.ips();
+X4164 = ips(:,2); Y4164 = ips(:,3); 
+SXX4164 = ips(:, 4); SYY4164 = ips(:, 5); SXY4164 = ips(:, 6);
+IP4164 = ips(:,1);
+
+% Different nodes
+
+% [ *** "Beam_Bending_Q4_4x1_Al.txt" already processed ! *** ]
+
+ro = A841.readout(); nsad = ro.nsad(); ips = ro.ips();
+X841 = ips(:,2); Y841 = ips(:,3);
+SXX841 = ips(:, 4); SYY841 = ips(:, 5); SXY841 = ips(:, 6);
+IP841 = ips(:,1);
+
+
+ro = A941.readout(); nsad = ro.nsad(); ips = ro.ips();
+X941 = ips(:,2); Y941 = ips(:,3);
+SXX941 = ips(:, 4); SYY941 = ips(:, 5); SXY941 = ips(:, 6);
+IP941 = ips(:,1);
+
+% Now we must find the integration point closest to [6,0]
+every_IP = [A441.getAllIP(); A482.getAllIP(); A4164.getAllIP(); ...
+            A841.getAllIP(); A941.getAllIP()];
+every_IP_dist = every_IP - [A,0,0,0];
+
+closest_IP = zeros(5,5); track_start = 1;
+for i = 1:length(assem_list)
+     track_end = track_start + assem_list(i).nel*assem_list(i).nIntPts -1;
+     section = every_IP_dist(track_start:track_end,:);
+     real_section = section(:,1:2); distance = vecnorm(real_section');
+     temp = section(min(distance)==distance,:); temp = temp(1,:);
+     closest_IP(i,:) = temp + [A,0,0,0];
+     track_start = track_end+1;
+end
+
+% Now create masks to locate relevant info for each of the closest IP
+maskA441 = (X441 == closest_IP(1,3)) & (Y441 == closest_IP(1,4)) ...
+            & (IP441 == closest_IP(1,5));
+maskA482 = (X482 == closest_IP(2,3)) & (Y482 == closest_IP(2,4)) ...
+            & (IP482 == closest_IP(2,5));
+maskA4164 = (X4164 == closest_IP(3,3)) & (Y4164 == closest_IP(3,4)) ...
+            & (IP4164 == closest_IP(3,5));
+maskA841 = (X841 == closest_IP(4,3)) & (Y841 == closest_IP(4,4)) ...
+            & (IP841 == closest_IP(4,5));
+maskA941 = (X941 == closest_IP(5,3)) & (Y941 == closest_IP(5,4)) ...
+            & (IP941 == closest_IP(5,5));
+
+% Compute errors in nodal stresses at A
+FEM_STRESS_A = [SXX441(maskA441), SXY441(maskA441); ...
+                SXX482(maskA482), SXY482(maskA482); ...
+                SXX4164(maskA4164), SXY4164(maskA4164); ...
+                SXX841(maskA841), SXY841(maskA841); ...
+                SXX941(maskA941), SXY941(maskA941)];
+
+EB_STRESS_A = [bending_stress_an(A(1), A(2)-0.5), shear_stress_an(A(1))];
+
+numer = abs( (FEM_STRESS_A - EB_STRESS_A));
+denom = abs(repmat(EB_STRESS_A, 5,1));
+error_stress_A = numer ./ denom;
+
+log_error_stress_A = log(error_stress_A);
+log_char_size = log([3., 1.5, 0.75, 3., 3.]);
+
+% Plotting
+% Sigma XX
+figure();
+scatter(log_char_size(1), log_error_stress_A(1,1)); hold on
+scatter(log_char_size(2), log_error_stress_A(2,1));
+scatter(log_char_size(3), log_error_stress_A(3,1));
+plot(log_char_size(1:3), log_error_stress_A(1:3,1));
+legend('4x1', '8x2', '16x4')
+title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 at an IP for Assemblies with 9-Point Integration for Al Q4 Element', 'interpreter', 'latex');
+xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xx}$$', 'interpreter', 'latex');
+
+figure();
+scatter(log_char_size(1), log_error_stress_A(1,1)); hold on
+scatter(log_char_size(4), log_error_stress_A(4,1));
+scatter(log_char_size(5), log_error_stress_A(5,1));
+legend('Q4', 'Q8', 'Q9');
+title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements at an IP with 9-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xx}$$', 'interpreter', 'latex');
 
 % Sigma XY
@@ -487,5 +780,6 @@ scatter(log_char_size(5), log_error_stress_A(5,2));
 legend('Q4', 'Q8', 'Q9');
 title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 9-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
+
 
 %%
