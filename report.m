@@ -780,6 +780,96 @@ scatter(log_char_size(5), log_error_stress_A(5,2));
 legend('Q4', 'Q8', 'Q9');
 title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 9-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
+%% Part D
 
 
-%%
+
+%% Question 2
+%% Part A
+clear; close all; clc; clean;
+
+% First load assemblies
+A4 = Assembly("Beam_Bending_Q4_16x4_PU.txt"); % 16x4, 4-node
+A49 = Assembly("Beam_Bending_Q4_16x4_PU.txt"); % 16x4, 4-node
+A4999 = Assembly("Beam_Bending_Q4_16x4_PU.txt"); % 16x4, 4-node
+
+% Set Poisson ratio accordingly
+A4.nu = 0.4; A49.nu = 0.49; A4999.nu = 0.4999; 
+
+assem_list = [A4, A49, A4999];
+
+for iter = 1:length(assem_list)
+   assem_list(iter).run();
+end
+
+ro4 = A4.readout(); nsad4 = ro4.nsad();
+ro49 = A49.readout(); nsad49 = ro49.nsad();
+ro4999 = A4999.readout(); nsad4999 = ro4999.nsad();
+
+% Neutral Axis
+nd4 = nsad4(:,2:5);
+namask4 = nd4(:, 2) == 0.5;
+d4 = nd4(namask4,3:4);
+x4 = nd4(namask4,1);
+
+nd49 = nsad49(:,2:5);
+namask49 = nd49(:, 2) == 0.5;
+d49 = nd49(namask49,3:4);
+x49 = nd49(namask49,1);
+
+nd4999 = nsad4999(:,2:5);
+namask4999 = nd4999(:, 2) == 0.5;
+d4999 = nd4999(namask4999,3:4);
+x4999 = nd4999(namask4999,1);
+
+figure()
+scatter(nd4(:,1)+nd4(:,3), nd4(:,2)+nd4(:,4));
+
+
+figure()
+scatter(x49, d49(:,1));    hold on
+scatter(x4999, d4999(:,1));
+scatter(x4, d4(:,1));
+legend('v=0.49', 'v=0.4999', 'v=0.4');
+title('X-Displacement Along Neutral Axis for PU 16x4 Q4');
+xlabel('X, along neutral axis'); ylabel('x-displacement');
+
+figure()
+scatter(x49, d49(:,2));    hold on
+scatter(x4999, d4999(:,2));
+scatter(x4, d4(:,2));
+legend('v=0.49', 'v=0.4999', 'v=0.4');
+title('Y-Displacement Along Neutral Axis for PU 16x4 Q4');
+xlabel('X, along neutral axis'); ylabel('y-displacement');
+
+
+% A to A'
+nd4 = nsad4(:,2:3); sxx4 = nsad4(:,6);
+namask4 = nd4(:,1) == 6.0;
+s4 = sxx4(namask4);
+y4 = nd4(namask4,2);
+
+nd49 = nsad49(:,2:3); sxx49 = nsad49(:,6);
+namask49 = nd49(:,1) == 6.0;
+s49 = sxx49(namask49);
+y49 = nd49(namask49,2);
+
+nd4999 = nsad4999(:,2:3); sxx4999 = nsad4999(:,6);
+namask4999 = nd4999(:,1) == 6.0;
+s4999 = sxx4999(namask4999);
+y4999 = nd4999(namask4999,2);
+
+figure()
+scatter(y49, s49);    hold on
+scatter(y4999, s4999);
+scatter(y4, s4);
+legend('v=0.49', 'v=0.4999', 'v=0.4');
+title('Bending Stress Along A to A prime for PU 16x4 Q4');
+xlabel('Y, along A to A prime'); ylabel('Bending Stress');
+
+
+
+
+%% Part B
+
+
