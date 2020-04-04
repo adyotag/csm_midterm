@@ -108,7 +108,7 @@ title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 4-Point Inte
 xlabel('l, characteristic length'); ylabel('e, Error in y-reaction force');
 
 
-% Now run using 9-node integration
+%% Now run using 9-node integration
 clean; clear; clc;
 
 % EB Solution
@@ -182,12 +182,6 @@ scatter(log_char_size(5), log_error(5));
 legend('Q4', 'Q8', 'Q9');
 title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 9-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in y-reaction force');
-
-% Comments
-fprintf("As expected, as we use a finer mesh, or use higher order elements, the error drops.\n");
-fprintf("What is interesting to note is that you don't get much of an error reduction when going from Q8 to Q9.\n");
-fprintf("Finally, we get the linear convergence of error against characteristic length, which is expected.\n")
-fprintf("What I found interesting was that the 4-node integration was slightly more accurate than 9-node integration.\n");
 
 %% Part C
 clean; clear; clc; close all;
@@ -344,7 +338,7 @@ title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements at Node with 4-Po
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
 
 
-% Now 9 integration points
+%% Now 9 integration points
 clean; clear; clc;
 
 
@@ -496,7 +490,7 @@ title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements at Node with 9-Po
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
 
 
-% Now we will look at what is happening at an IP near Node A
+%% Now we will look at what is happening at an IP near Node A
 clean; clear; clc;
 
 % First 4 integration points
@@ -630,7 +624,7 @@ scatter(log_char_size(2), log_error_stress_A(2,2));
 scatter(log_char_size(3), log_error_stress_A(3,2));
 plot(log_char_size(1:3), log_error_stress_A(1:3,2));
 legend('4x1', '8x2', '16x4')
-title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 Assemblies with 4-Point Integration for Al Q4 Element', 'interpreter', 'latex');
+title('$$\log(e)$$ vs. $$\log(l)$$ for 4x1, 8x2, and 16x4 Assemblies at an IP with 4-Point Integration for Al Q4 Element', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
 
 figure();
@@ -638,12 +632,12 @@ scatter(log_char_size(1), log_error_stress_A(1,2)); hold on
 scatter(log_char_size(4), log_error_stress_A(4,2));
 scatter(log_char_size(5), log_error_stress_A(5,2));
 legend('Q4', 'Q8', 'Q9');
-title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 4-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
+title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements at an IP with 4-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
 
 
 clean; clear; clc;
-% Now with 9 integration points
+%% Now with 9 integration points
 
 % EB Solution
 q = 2.71E-9 * 9.82E3;
@@ -785,15 +779,6 @@ scatter(log_char_size(5), log_error_stress_A(5,2));
 legend('Q4', 'Q8', 'Q9');
 title('$$\log(e)$$ vs. $$\log(l)$$ for Q4, Q8, and Q9 Elements with 9-Point Integration for Al 4x1 Assembly', 'interpreter', 'latex');
 xlabel('l, characteristic length'); ylabel('e, Error in $$\sigma_{xy}$$', 'interpreter', 'latex');
-
-
-% Comments
-fprintf("The error in displacement norm is expected, as EB does not predict x displacements, only deflection.");
-fprintf("What is interesting to note is that for the nodal displacements and stresses, Q9 was most accurate for nodal displacements, but was least accurate for bending stress. \n");
-fprintf("Instead, Q4 was most accurate for stress. This is most likely because Q4 has less of a resolution to represent stresses and BC, similar to the EB case. Again, it was expected that \n");
-fprintf("using a large mesh (more elements, and thus lower characteristic length) leads to less error. For the shear stress, the Q8 was most \n");
-fprintf("representative of the beam. This could again be because Q8 doesn't have as much resolution as Q9, and can represent shear stress in beam, since that's of order 1 in x.\n")
-fprintf("What I found interesting was that the 4-node integration was slightly more accurate than 9-node integration.\n");
 
 
 %% Part D
@@ -1097,14 +1082,6 @@ plot(y4, s4);
 legend('v=0.49', 'v=0.4999', 'v=0.4');
 title('Bending Stress Along A to A prime for PU 16x4 Q4');
 xlabel('Y, along A to A prime'); ylabel('Bending Stress');
-
-%Comments
-fprintf("For some reason, I couldn't get the plots to work, but I know what happens.\n");
-fprintf("As v becomes closer to 0.5, the element becomes more incompressible. As it becomes more incompressible, the D \n");
-fprintf("matrix starts to blow up, making K become larger. The larger the values are in the matrix, the more ill-conditioned the stiffness matrix becomes. \n");
-fprintf("As a result, K becomes harder to invert. And the inverse becomes really sensitive. So much so that even the smallest numerical inaccuracies lead to \n");
-fprintf("inaccurate/incorrect answers.");
-
 
 %% Part B
 clear; close all; clc; clean;
